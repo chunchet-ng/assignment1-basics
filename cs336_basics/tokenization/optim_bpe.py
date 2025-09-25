@@ -93,16 +93,19 @@ def update_cnt(word_cnt, pair_cnt, merge_pair):
 
     return new_word_cnt, new_pair_cnt
 
-def remove_special_tokens_and_pretokenize(text: str, special_tokens: list[str]):
+def remove_special_tokens_and_pretokenize(text: str, special_tokens: list[str], drop_special: bool = True):
     if not special_tokens:
         chunks = [text]
     else:
         # Sort by descending length to prioritize longer tokens
         sorted_tokens = sorted(special_tokens, key=len, reverse=True)
         pattern = "|".join(re.escape(tok) for tok in sorted_tokens)
+        
+        if not drop_special: pattern = f"({pattern})"
         pattern = re.compile(pattern)
+        
         chunks = pattern.split(text)
-        chunks = [c for c in chunks if c and c not in special_tokens]  # remove empty strings and special tokens
+        chunks = [c for c in chunks if c]
     return chunks
 
 def _worker_count_slice(args):
